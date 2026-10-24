@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Kalkulator Perkalian Tepat</title>
+<meta name="description" content="Kalkulator perkalian dengan hasil eksak: bilangan raksasa, pecahan, dan desimal berulang tanpa pembulatan.">
+<meta name="theme-color" content="#07060F">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22><rect width=%2232%22 height=%2232%22 rx=%228%22 fill=%22%238B6CFF%22/><path d=%22M10 10l12 12M22 10L10 22%22 stroke=%22white%22 stroke-width=%223.5%22 stroke-linecap=%22round%22/></svg>">
+<script>try{var t=localStorage.getItem("theme")||(matchMedia("(prefers-color-scheme:light)").matches?"light":"dark");document.documentElement.dataset.theme=t}catch(e){}</script>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#07060F;--card:#0D0B1A;--line:#2B2450;--ink:#F4F2FF;--mut:#9A94B8;--acc:#8B6CFF;--accs:rgba(139,108,255,.14);--key:#15122A;--prim:#fff;--primt:#0B0A14;--ok:#2BD99A;--err:#FF7A8A;--glow1:rgba(122,80,255,.28);--glow2:rgba(60,70,255,.18);--dot:rgba(160,140,255,.35)}
+[data-theme=light]{--bg:#F4F1FF;--card:#FFFFFF;--line:#DCD5F7;--ink:#1A1340;--mut:#6F688F;--acc:#6D4AFF;--accs:rgba(109,74,255,.09);--key:#ECE8FF;--prim:#1A1340;--primt:#fff;--ok:#0E9F6E;--err:#D6334A;--glow1:rgba(150,120,255,.35);--glow2:rgba(255,150,210,.28);--dot:rgba(109,74,255,.28)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Bricolage Grotesque",system-ui,sans-serif;min-height:100vh;display:flex;justify-content:center;padding:0 12px;transition:background .3s,color .3s}
+svg{display:block}
+main{width:100%;max-width:440px;padding:14px 0 28px}
+header{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.ib{width:46px;height:46px;border-radius:14px;border:1.5px solid var(--line);background:var(--accs);color:var(--acc);display:grid;place-items:center;flex:none}
+header h1{margin:0;font-size:21px;font-weight:700;letter-spacing:-.02em;flex:1}
+header h1 small{display:block;font-family:"JetBrains Mono",monospace;font-size:11px;font-weight:500;letter-spacing:.14em;color:var(--ok);margin-top:2px}
+#theme{background:var(--card);color:var(--ink);cursor:pointer}
+nav{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:14px}
+nav button{font:inherit;font-weight:700;font-size:14.5px;height:48px;border-radius:15px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+nav button[aria-selected=true]{background:var(--prim);color:var(--primt);border-color:var(--prim)}
+section[hidden]{display:none}
+.screen{background:var(--card);border:1.5px solid var(--line);border-radius:22px;padding:14px 16px;min-height:132px;display:flex;flex-direction:column;justify-content:flex-end;text-align:right;font-family:"JetBrains Mono",monospace;margin-bottom:10px}
+#expr{color:var(--mut);font-size:15px;min-height:22px;word-break:break-all}
+#res{font-size:34px;font-weight:500;word-break:break-all;line-height:1.15;margin-top:2px}
+#res.long{font-size:20px}#res.err{color:var(--err);font-size:15px;font-family:"Bricolage Grotesque",sans-serif}
+#meta{color:var(--mut);font-size:12px;margin-top:8px;word-break:break-all;line-height:1.45}
+.chips{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-bottom:8px}
+.pad{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.chips button,.pad button{font:inherit;border:0;cursor:pointer;color:var(--ink);background:var(--key);border-radius:18px;height:58px;font-size:23px;font-weight:500;transition:transform .45s cubic-bezier(.34,1.8,.5,1),box-shadow .2s;box-shadow:inset 0 -3px 0 rgba(0,0,0,.18);touch-action:manipulation;user-select:none}
+.chips button{height:38px;font-size:14px;font-weight:700;background:transparent;border:1.5px solid var(--acc);color:var(--acc);border-radius:12px;box-shadow:none}
+.pad button:active,.chips button:active,.go:active,nav button:active,.ib:active{transform:scale(.88,.8);transition-duration:.07s}
+.pad .f{background:var(--accs);color:var(--acc);font-size:19px;font-weight:700}
+.pad .o{border:1.5px solid var(--line);background:var(--card);color:var(--ink)}
+.pad .x{background:var(--acc);color:#fff;font-size:32px;font-weight:700;box-shadow:0 8px 24px -8px var(--acc),inset 0 -3px 0 rgba(0,0,0,.2)}
+.pad .eq{background:var(--prim);color:var(--primt);grid-column:span 2;font-weight:800;font-size:28px}
+button:focus-visible,input:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+.hist{margin-top:12px}.hist button{display:block;width:100%;text-align:right;background:none;border:0;border-top:1px solid var(--line);color:var(--mut);font-family:"JetBrains Mono",monospace;font-size:12.5px;padding:9px 2px;word-break:break-all;cursor:pointer}
+label{display:block;font-size:13px;color:var(--mut);margin:0 0 6px 2px}
+.row{display:flex;gap:8px;margin-bottom:10px}
+input{flex:1;min-width:0;font:inherit;font-family:"JetBrains Mono",monospace;font-size:18px;padding:0 14px;height:54px;border-radius:16px;border:1.5px solid var(--line);background:var(--card);color:var(--ink)}
+.go{font:inherit;font-weight:700;font-size:16px;border:0;border-radius:16px;height:54px;padding:0 20px;background:var(--prim);color:var(--primt);cursor:pointer;transition:transform .45s cubic-bezier(.34,1.8,.5,1)}
+.list,.big{background:var(--card);border:1.5px solid var(--line);border-radius:22px;padding:6px 16px;font-family:"JetBrains Mono",monospace}
+.list{font-size:14.5px}.list:empty{display:none}
+.list div{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid var(--line)}
+.list div:first-child{border:0}
+.list span:last-child{text-align:right;word-break:break-all}
+.big{font-size:22px;line-height:1.55;word-break:break-word;padding:14px 16px}
+.big em{font-style:normal;color:var(--acc);font-weight:500}
+.note{color:var(--mut);font-size:13px;line-height:1.5;margin:10px 2px 0}
+@media (prefers-reduced-motion:reduce){.pad button,.chips button,.go{transition:none}}
+nav button{display:flex;align-items:center;justify-content:center;gap:8px}
+nav button svg{flex:none;color:var(--acc);transition:transform .45s cubic-bezier(.34,1.8,.5,1)}
+nav button[aria-selected=true] svg{color:var(--primt)}
+nav button:active svg{transform:scale(.8) rotate(-12deg)}
+.pad button svg{margin:auto;pointer-events:none}
+.pad .eq svg{width:30px;height:30px}
+#bg{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+.page-glow{position:fixed;width:90vmax;height:90vmax;border-radius:50%;z-index:0;pointer-events:none;will-change:transform}
+.glow-a{left:-45vmax;top:-45vmax;background:radial-gradient(circle,var(--glow1),transparent 65%);animation:driftA 22s ease-in-out infinite alternate}
+.glow-b{right:-50vmax;bottom:-45vmax;background:radial-gradient(circle,var(--glow2),transparent 65%);animation:driftB 28s ease-in-out infinite alternate}
+@keyframes driftA{to{transform:translate(45vmax,30vmax) scale(1.15)}}
+@keyframes driftB{to{transform:translate(-40vmax,-35vmax) scale(1.2)}}
+main{position:relative;z-index:1}
+@media (prefers-reduced-motion:reduce){.page-glow{animation:none}}
+nav button{gap:6px;font-size:13.5px;padding:0 4px}
+@media (max-width:430px){nav button{flex-direction:column;gap:5px;height:58px;font-size:12.5px}}
+.hhead{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}
+.hhead b{display:block;font-size:17px;letter-spacing:-.01em}
+.hhead small{color:var(--mut);font-size:12.5px}
+.clr{display:inline-flex;align-items:center;gap:7px;height:42px;padding:0 14px;border-radius:14px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);font:inherit;font-weight:700;font-size:13.5px;cursor:pointer;flex:none;transition:transform .45s cubic-bezier(.34,1.8,.5,1),color .2s,border-color .2s}
+.clr:active{transform:scale(.9,.84);transition-duration:.07s}
+.clr.sure{color:var(--err);border-color:var(--err)}
+.clr[hidden]{display:none}
+.hlist{max-height:min(64vh,540px);overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;background:var(--card);border:1.5px solid var(--line);border-radius:22px;scrollbar-width:thin;scrollbar-color:var(--line) transparent}
+.hitem{display:flex;align-items:center;gap:10px;padding:12px 10px 12px 16px;border-top:1px solid var(--line);transition:opacity .18s,transform .18s}
+.hitem:first-child{border-top:0}
+.hitem.out{opacity:0;transform:translateX(36px)}
+.hmain{flex:1;min-width:0;text-align:left;background:none;border:0;color:var(--ink);font:inherit;cursor:pointer;padding:0;display:flex;flex-direction:column;gap:3px;font-family:"JetBrains Mono",monospace}
+.he{color:var(--mut);font-size:12.5px;word-break:break-all}
+.hr{font-size:18px;font-weight:500;word-break:break-all;line-height:1.3}
+.hdel{width:40px;height:40px;border-radius:13px;border:1.5px solid var(--line);background:transparent;color:var(--mut);display:grid;place-items:center;cursor:pointer;flex:none;transition:transform .45s cubic-bezier(.34,1.8,.5,1),color .2s,border-color .2s}
+.hdel:active{transform:scale(.85);color:var(--err);border-color:var(--err);transition-duration:.07s}
+.hempty{padding:34px 22px;text-align:center;color:var(--mut);font-size:14.5px;line-height:1.55}
+.hempty svg{margin:0 auto 10px;color:var(--acc)}
+#theme{position:relative;overflow:hidden}
+#theme svg{position:absolute;inset:0;margin:auto;transition:transform .7s cubic-bezier(.34,1.56,.64,1),opacity .3s}
+[data-theme=dark] #theme{color:#BFB0FF;box-shadow:0 0 20px -6px var(--acc)}
+[data-theme=dark] #theme .sn{opacity:0;transform:rotate(-140deg) scale(.3)}
+[data-theme=light] #theme{color:#F59E0B;border-color:#F8D9A0;background:#FFF8E8;box-shadow:0 8px 18px -10px rgba(245,158,11,.8)}
+[data-theme=light] #theme .mn{opacity:0;transform:rotate(140deg) scale(.3)}
+.tt .screen,.tt .pad button,.tt nav button,.tt input,.tt .hlist,.tt .list,.tt .big,.tt .ib,.tt .chips button,.tt .hitem,.tt .clr,.tt .hdel{transition:background-color .35s,border-color .35s,color .35s,box-shadow .35s!important}
+[data-theme=light] .screen,[data-theme=light] .list,[data-theme=light] .big,[data-theme=light] .hlist,[data-theme=light] input{box-shadow:0 14px 34px -18px rgba(80,50,200,.4)}
+[data-theme=light] .pad button{box-shadow:inset 0 -3px 0 rgba(109,74,255,.16),0 1px 0 #fff}
+[data-theme=light] .pad .o{box-shadow:0 8px 20px -14px rgba(80,50,200,.5)}
+[data-theme=light] .pad .x{box-shadow:0 10px 24px -8px rgba(109,74,255,.7),inset 0 -3px 0 rgba(0,0,0,.15)}
+[data-theme=light] .pad .eq{box-shadow:0 10px 24px -10px rgba(26,19,64,.65)}
+[data-theme=light] .chips button{box-shadow:none}
+[data-theme=light] nav button[aria-selected=false],[data-theme=light] .clr{box-shadow:0 8px 20px -16px rgba(80,50,200,.5)}
+nav[hidden]{display:none}
+#menuBtn{cursor:pointer}
+body.menu{overflow:hidden}
+#scrim{position:fixed;inset:0;z-index:20;background:rgba(5,4,15,.55);backdrop-filter:blur(5px);opacity:0;pointer-events:none;transition:opacity .35s}
+.menu #scrim{opacity:1;pointer-events:auto}
+#drawer{position:fixed;top:0;left:0;bottom:0;width:min(86vw,330px);z-index:30;background:var(--card);border-right:1.5px solid var(--line);padding:calc(16px + env(safe-area-inset-top,0px)) 16px 16px;transform:translateX(-105%);visibility:hidden;transition:transform .5s cubic-bezier(.22,1,.36,1),visibility 0s .5s;box-shadow:24px 0 60px -20px rgba(0,0,0,.5)}
+.menu #drawer{transform:none;visibility:visible;transition-delay:0s}
+.dh{display:flex;align-items:center;gap:12px;margin-bottom:22px}
+.dt{flex:1;min-width:0}.dt b{display:block;font-size:19px;letter-spacing:-.02em}
+.dt small{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.16em;color:var(--mut)}
+#dclose{background:var(--bg);color:var(--ink);cursor:pointer}
+.dl{display:flex;flex-direction:column;gap:10px}
+.di{display:flex;align-items:center;gap:14px;width:100%;text-align:left;font:inherit;color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:20px;padding:12px;cursor:pointer;transition:transform .45s cubic-bezier(.34,1.8,.5,1),border-color .2s,background .2s}
+.di:active{transform:scale(.95,.92);transition-duration:.07s}
+.di .ib{width:46px;height:46px}
+.dx{flex:1;min-width:0}.dx b{display:block;font-size:16px}.dx small{color:var(--mut);font-size:12.5px;line-height:1.35}
+.di[aria-current=true]{border-color:var(--acc);background:var(--accs)}
+.di[aria-current=true] .ib{background:var(--acc);color:#fff;border-color:var(--acc)}
+.stage{perspective:1800px;display:flex;justify-content:center;padding:8px 0}
+#book{position:relative;width:min(100%,340px);aspect-ratio:3/4.4;transform-style:preserve-3d;touch-action:pan-y;user-select:none}
+.leaf{position:absolute;inset:0;transform-origin:left center;transform-style:preserve-3d;transition:transform 1s cubic-bezier(.5,.05,.2,1)}
+.leaf.f{transform:rotateY(-180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;background:var(--card);border:1.5px solid var(--line);border-radius:6px 22px 22px 6px;padding:26px 22px 20px 30px;overflow:hidden;display:flex;flex-direction:column}
+.front::after{content:"";position:absolute;left:0;top:0;bottom:0;width:20px;background:linear-gradient(90deg,rgba(15,8,50,.3),transparent);pointer-events:none}
+.leaf:not(.f) .front{box-shadow:8px 14px 30px -14px rgba(0,0,0,.65)}
+.face h4{margin:0 0 8px;font-size:23px;letter-spacing:-.03em;line-height:1.1}
+.face p{color:var(--mut);font-size:14px;line-height:1.55;margin:0 0 14px}
+.eqn{background:var(--accs);border-radius:16px;padding:14px 16px;font-family:"JetBrains Mono",monospace;font-size:15px;line-height:1.75}
+.eqn b{color:var(--acc);font-weight:500}
+.dots{display:grid;grid-template-columns:repeat(4,24px);gap:9px;margin:0 0 16px}.dots i{width:24px;height:24px;border-radius:50%;background:var(--acc)}
+.pn{margin-top:auto;display:flex;justify-content:space-between;font-family:"JetBrains Mono",monospace;font-size:12px;color:var(--mut)}
+.cover{background:linear-gradient(150deg,#7B5CFF,#2B1A8F 75%);border-color:transparent;color:#fff}
+.cover p,.cover .pn{color:rgba(255,255,255,.8)}
+.ck{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.2em;opacity:.85}
+.cx{font-size:150px;font-weight:800;line-height:1;margin:auto 0;text-align:center;opacity:.95;text-shadow:0 12px 40px rgba(0,0,0,.35)}
+.back{transform:rotateY(180deg);border-radius:22px 6px 6px 22px;align-items:center;justify-content:center;text-align:center;background:var(--key)}
+.bn{font-size:76px;font-weight:800;letter-spacing:-.04em;color:var(--acc);line-height:1;word-break:break-all}
+.back small{font-family:"JetBrains Mono",monospace;color:var(--mut);font-size:12.5px;margin-top:10px}
+.fctl{display:flex;align-items:center;justify-content:space-between;max-width:340px;margin:18px auto 0}
+.fb{width:56px;height:56px;border-radius:18px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);display:grid;place-items:center;cursor:pointer;transition:transform .45s cubic-bezier(.34,1.8,.5,1),opacity .2s}
+.fb:active{transform:scale(.86,.8);transition-duration:.07s}.fb:disabled{opacity:.3;pointer-events:none}
+#fnext{background:var(--prim);color:var(--primt);border-color:var(--prim)}
+[data-theme=light] .front::after{background:linear-gradient(90deg,rgba(60,40,140,.16),transparent)}
+[data-theme=light] .face{box-shadow:0 14px 34px -18px rgba(80,50,200,.35)}
+@media (prefers-reduced-motion:reduce){.leaf{transition-duration:.01s}#drawer{transition-duration:.01s}}
+.face{container-type:inline-size}
+.sk{background-color:var(--key);background-image:radial-gradient(var(--line) 1.2px,transparent 1.7px);background-size:18px 18px;padding:16px 14px 14px 22px}
+.kh{display:flex;justify-content:space-between;font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.14em;color:var(--mut);margin-bottom:4px}
+.board{position:relative;flex:1;width:100%;min-height:0}
+.st{position:absolute;transform:rotate(var(--r));filter:drop-shadow(0 5px 5px rgba(0,0,0,.32))}
+.st .ol{position:absolute;inset:-3.2%;background:#fff;clip-path:var(--cp);border-radius:var(--br)}
+.st .sh{position:absolute;inset:0;display:grid;place-items:center;text-align:center;background:var(--bg);clip-path:var(--cp);border-radius:var(--br);color:var(--c);font-weight:800;font-size:var(--fs);line-height:1.08;letter-spacing:-.03em;padding:5%;overflow:hidden}
+.st .sh::after{content:"";position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.42),transparent 42%);pointer-events:none}
+.cover .board{margin:6px 0}.cover h4{margin:0 0 6px}
+.back.sk{padding:16px 14px;align-items:stretch}
+.cap{position:absolute;left:0;right:0;bottom:22px;text-align:center;font-family:"JetBrains Mono",monospace;font-size:13px;color:var(--mut);letter-spacing:.08em}
+</style>
+</head>
+<body>
+<canvas id="bg" aria-hidden="true"></canvas><div class="page-glow glow-a"></div><div class="page-glow glow-b"></div>
+<div id="scrim"></div>
+<aside id="drawer" aria-hidden="true" aria-label="Menu">
+<div class="dh"><div class="ib" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="2.5" width="16" height="19" rx="4"/><path d="M8 7h8M9 12l3 3m0-3l-3 3M8 18.2h.01M16 18.2h.01"/></svg></div><div class="dt"><b>Kalkulator Tepat</b><small>MENU</small></div>
+<button class="ib" id="dclose" type="button" aria-label="Tutup menu"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+<div class="dl">
+<button class="di" data-v="calc" aria-current="true"><span class="ib"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="2.5" width="16" height="19" rx="4"/><path d="M8 7h8M9 12l3 3m0-3l-3 3M8 18.2h.01M16 18.2h.01"/></svg></span><span class="dx"><b>Kalkulator</b><small>Hitung, tabel, faktor, riwayat</small></span></button>
+<button class="di" data-v="flip" aria-current="false"><span class="ib"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 6.5C10 5 7 4.5 4 5v13c3-.5 6 0 8 1.5 2-1.5 5-2 8-1.5V5c-3-.5-6 0-8 1.5zM12 6.5v13"/></svg></span><span class="dx"><b>Flipbook 3D</b><small>Stiker, logo, dan rumus perkalian</small></span></button>
+</div></aside>
+<main>
+<header>
+<button class="ib" id="menuBtn" type="button" aria-label="Buka menu" aria-expanded="false" aria-controls="drawer"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="2.5" width="16" height="19" rx="4"/><path d="M8 7h8M9 12l3 3m0-3l-3 3M8 18.2h.01M16 18.2h.01"/></svg></button>
+<h1>Kalkulator Tepat<small>HASIL EKSAK</small></h1>
+<button class="ib" id="theme" type="button" aria-label="Ganti tema terang atau gelap"><svg class="mn" width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg><svg class="sn" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2" fill="currentColor"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M18.7 5.3l-1.6 1.6M6.9 17.1l-1.6 1.6"/></svg></button>
+</header>
+<nav role="tablist">
+<button role="tab" aria-selected="true" data-t="calc"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2l2.4 6.6L21 11l-6.6 2.4L12 20l-2.4-6.6L3 11l6.6-2.4z" fill="currentColor" stroke="none"/></svg><span>Hitung</span></button>
+<button role="tab" aria-selected="false" data-t="table"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l9 9-9 9-9-9z"/><path d="M12 8l4 4-4 4-4-4z"/></svg><span>Tabel ×</span></button>
+<button role="tab" aria-selected="false" data-t="prime"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg><span>Faktor ×</span></button>
+<button role="tab" aria-selected="false" data-t="history"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span>Riwayat</span></button>
+</nav>
+
+<section id="calc">
+<div class="screen"><div id="expr"></div><div id="res">0</div><div id="meta"></div></div>
+<div class="chips" aria-label="Pintasan perkalian">
+<button data-i="^2">x²</button><button data-i="^3">x³</button><button data-i="×10">×10</button><button data-i="×100">×100</button><button data-i="×1000">×1k</button><button data-i="×0.5">×½</button>
+</div>
+<div class="pad">
+<button class="f" data-k="C">AC</button>
+<button class="f" data-k="B" aria-label="Hapus"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 5H9l-6 7 6 7h12z"/><path d="M13 9.5l5 5m0-5l-5 5"/></svg></button>
+<button class="f" data-i="(">(</button><button class="f" data-i=")">)</button>
+<button class="f" data-i="^">^</button><button class="f" data-i="!">n!</button><button class="f" data-i="%">%</button><button class="o" data-i="÷" aria-label="Bagi"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><circle cx="12" cy="5.5" r="1.3" fill="currentColor"/><circle cx="12" cy="18.5" r="1.3" fill="currentColor"/></svg></button>
+<button data-i="7">7</button><button data-i="8">8</button><button data-i="9">9</button><button class="x" data-i="×" aria-label="Kali"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg></button>
+<button data-i="4">4</button><button data-i="5">5</button><button data-i="6">6</button><button class="o" data-i="−" aria-label="Kurang"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/></svg></button>
+<button data-i="1">1</button><button data-i="2">2</button><button data-i="3">3</button><button class="o" data-i="+" aria-label="Tambah"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+<button data-i="0">0</button><button data-i=".">.</button><button class="eq" data-k="=" aria-label="Hitung hasil"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 9h14M5 15h14"/></svg></button>
+</div>
+</section>
+
+<section id="table" hidden>
+<label for="tn">Bilangan (boleh desimal atau ekspresi) dan sampai kali ke</label>
+<div class="row"><input id="tn" value="7" inputmode="decimal" autocomplete="off"><input id="tm" value="12" inputmode="numeric" style="max-width:90px" aria-label="Sampai kali ke"></div>
+<button class="go" id="tgo" style="width:100%;margin-bottom:10px" type="button">Buat tabel ×</button>
+<div class="list" id="tl"></div>
+<p class="note">Setiap baris dihitung eksak, tanpa galat pembulatan.</p>
+</section>
+
+<section id="prime" hidden>
+<label for="pn">Bilangan bulat positif</label>
+<div class="row"><input id="pn" value="360360" inputmode="numeric" autocomplete="off"><button class="go" id="pgo" type="button">Uraikan</button></div>
+<div class="big" id="pr"></div>
+<p class="note">Mengurai bilangan menjadi hasil kali bilangan prima. Batas aman: 9.007.199.254.740.991.</p>
+</section>
+<section id="history" hidden>
+<div class="hhead"><div><b id="hcount">0 hitungan</b><small>Ketuk untuk memakai hasilnya lagi</small></div>
+<button class="clr" id="hclear" type="button"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M9 7V4.5h6V7M6.5 7l1 13h9l1-13M10 11v5M14 11v5"/></svg><span>Hapus semua</span></button></div>
+<div class="hlist" id="hlist" aria-label="Daftar riwayat"></div>
+</section>
+<section id="flip" hidden>
+<div class="stage"><div id="book"><div class="leaf"><div class="face front cover"><span class="ck">STICKER PACK</span><div class="board"><div class="st" style="left:10%;top:2%;width:66%;aspect-ratio:1;--r:-10deg;--cp:polygon(20% 0,50% 30%,80% 0,100% 20%,70% 50%,100% 80%,80% 100%,50% 70%,20% 100%,0 80%,30% 50%,0 20%);--br:0;--bg:linear-gradient(145deg,#FFD84D,#FF9F1C);--c:#2A1500;--fs:36cqw"><i class="ol"></i><span class="sh"><span>×</span></span></div><div class="st" style="left:62%;top:0%;width:34%;aspect-ratio:1;--r:14deg;--cp:polygon(50.0% 0.0%,65.7% 12.1%,85.4% 14.6%,87.9% 34.3%,100.0% 50.0%,87.9% 65.7%,85.4% 85.4%,65.7% 87.9%,50.0% 100.0%,34.3% 87.9%,14.6% 85.4%,12.1% 65.7%,0.0% 50.0%,12.1% 34.3%,14.6% 14.6%,34.3% 12.1%);--br:0;--bg:linear-gradient(145deg,#FF7AC6,#E0309A);--c:#fff;--fs:11cqw"><i class="ol"></i><span class="sh"><span>x²</span></span></div><div class="st" style="left:2%;top:56%;width:32%;aspect-ratio:1;--r:-10deg;--cp:none;--br:50%;--bg:linear-gradient(145deg,#5CF2C0,#12B886);--c:#04281E;--fs:11cqw"><i class="ol"></i><span class="sh"><span>×9</span></span></div><div class="st" style="left:62%;top:56%;width:34%;aspect-ratio:1.1;--r:8deg;--cp:polygon(25% 4%,75% 4%,100% 50%,75% 96%,25% 96%,0 50%);--br:0;--bg:linear-gradient(145deg,#5CC8FF,#2F6BFF);--c:#fff;--fs:9cqw"><i class="ol"></i><span class="sh"><span>a·b</span></span></div></div><h4>Stiker &amp; Rumus Perkalian</h4><p>Logo, rumus, dan trik yang bisa kamu tempel di kepala.</p><div class="pn"><span>Ketuk atau geser</span><span>→</span></div></div><div class="face back sk"><div class="board"><div class="st" style="left:15%;top:18%;width:70%;aspect-ratio:1;--r:-6deg;--cp:polygon(50.0% 0.0%,65.7% 12.1%,85.4% 14.6%,87.9% 34.3%,100.0% 50.0%,87.9% 65.7%,85.4% 85.4%,65.7% 87.9%,50.0% 100.0%,34.3% 87.9%,14.6% 85.4%,12.1% 65.7%,0.0% 50.0%,12.1% 34.3%,14.6% 14.6%,34.3% 12.1%);--br:0;--bg:linear-gradient(145deg,#FFD84D,#FF9F1C);--c:#2A1500;--fs:40cqw"><i class="ol"></i><span class="sh"><span>×</span></span></div></div><small class="cap">kali</small></div></div><div class="leaf"><div class="face front sk"><div class="kh"><span>STIKER 02</span><span>LOGO ×</span></div><div class="board"><div class="st" style="left:4%;top:2%;width:60%;aspect-ratio:1;--r:-8deg;--cp:polygon(20% 0,50% 30%,80% 0,100% 20%,70% 50%,100% 80%,80% 100%,50% 70%,20% 100%,0 80%,30% 50%,0 20%);--br:0;--bg:linear-gradient(145deg,#FFD84D,#FF9F1C);--c:#2A1500;--fs:34cqw"><i class="ol"></i><span class="sh"><span>×</span></span></div><div class="st" style="left:58%;top:5%;width:38%;aspect-ratio:1;--r:12deg;--cp:polygon(50.0% 0.0%,65.7% 12.1%,85.4% 14.6%,87.9% 34.3%,100.0% 50.0%,87.9% 65.7%,85.4% 85.4%,65.7% 87.9%,50.0% 100.0%,34.3% 87.9%,14.6% 85.4%,12.1% 65.7%,0.0% 50.0%,12.1% 34.3%,14.6% 14.6%,34.3% 12.1%);--br:0;--bg:linear-gradient(145deg,#FF7AC6,#E0309A);--c:#fff;--fs:22cqw"><i class="ol"></i><span class="sh"><span>×</span></span></div><div class="st" style="left:2%;top:47%;width:36%;aspect-ratio:1;--r:-12deg;--cp:none;--br:50%;--bg:linear-gradient(145deg,#9B7CFF,#5B3DF0);--c:#fff;--fs:13cqw"><i class="ol"></i><span class="sh"><span>×2</span></span></div><div class="st" style="left:38%;top:51%;width:32%;aspect-ratio:1.1;--r:8deg;--cp:polygon(25% 4%,75% 4%,100% 50%,75% 96%,25% 96%,0 50%);--br:0;--bg:linear-gradient(145deg,#5CF2C0,#12B886);--c:#04281E;--fs:11cqw"><i class="ol"></i><span class="sh"><span>×10</span></span></div><div class="st" style="left:68%;top:52%;width:29%;aspect-ratio:1;--r:-6deg;--cp:none;--br:26%;--bg:linear-gradient(145deg,#5CC8FF,#2F6BFF);--c:#fff;--fs:18cqw"><i class="ol"></i><span class="sh"><span>×</span></span></div><div class="st" style="left:6%;top:79%;width:50%;aspect-ratio:2.6;--r:-5deg;--cp:none;--br:999px;--bg:linear-gradient(145deg,#FF9A5C,#F0471F);--c:#fff;--fs:9cqw"><i class="ol"></i><span class="sh"><span>KALI</span></span></div><div class="st" style="left:62%;top:77%;width:32%;aspect-ratio:1;--r:10deg;--cp:none;--br:50%;--bg:linear-gradient(145deg,#3A3470,#14102E);--c:#fff;--fs:13cqw"><i class="ol"></i><span class="sh"><span>x²</span></span></div></div><div class="pn"><span>02</span><span>Stiker &amp; Rumus</span></div></div><div class="face back sk"><div class="board"><div class="st" style="left:15%;top:18%;width:70%;aspect-ratio:1;--r:-6deg;--cp:none;--br:50%;--bg:linear-gradient(145deg,#FF7AC6,#E0309A);--c:#fff;--fs:30cqw"><i class="ol"></i><span class="sh"><span>12</span></span></div></div><small class="cap">4 × 3</small></div></div><div class="leaf"><div class="face front sk"><div class="kh"><span>STIKER 03</span><span>RUMUS DASAR</span></div><div class="board"><div class="st" style="left:2%;top:1%;width:96%;aspect-ratio:3.4;--r:-2deg;--cp:none;--br:26%;--bg:linear-gradient(145deg,#9B7CFF,#5B3DF0);--c:#fff;--fs:9cqw"><i class="ol"></i><span class="sh"><span>a × b = b × a</span></span></div><div class="st" style="left:2%;top:21%;width:44%;aspect-ratio:1.05;--r:-6deg;--cp:none;--br:58% 42% 55% 45% / 48% 58% 42% 52%;--bg:linear-gradient(145deg,#5CF2C0,#12B886);--c:#04281E;--fs:9cqw"><i class="ol"></i><span class="sh"><span>a × 1<br>= a</span></span></div><div class="st" style="left:54%;top:20%;width:44%;aspect-ratio:1.1;--r:7deg;--cp:polygon(25% 4%,75% 4%,100% 50%,75% 96%,25% 96%,0 50%);--br:0;--bg:linear-gradient(145deg,#FFD84D,#FF9F1C);--c:#2A1500;--fs:9cqw"><i class="ol"></i><span class="sh"><span>a × 0<br>= 0</span></span></div><div class="st" style="left:3%;top:46%;width:44%;aspect-ratio:1;--r:10deg;--cp:polygon(50.0% 0.0%,65.7% 12.1%,85.4% 14.6%,87.9% 34.3%,100.0% 50.0%,87.9% 65.7%,85.4% 85.4%,65.7% 87.9%,50.0% 100.0%,34.3% 87.9%,14.6% 85.4%,12.1% 65.7%,0.0% 50.0%,12.1% 34.3%,14.6% 14.6%,34.3% 12.1%);--br:0;--bg:linear-gradient(145deg,#FF7AC6,#E0309A);--c:#fff;--fs:8cqw"><i class="ol"></i><span class="sh"><span>a × a<br>= a²</span></span></div><div class="st" style="left:55%;top:47%;width:42%;aspect-ratio:1;--r:-8deg;--cp:none;--br:50%;--bg:linear-gradient(145deg,#3A3470,#14102E);--c:#fff;--fs:7.5cqw"><i class="ol"></i><span class="sh"><span>(−)×(−)<br>= +</span></span></div><div class="st" style="left:2%;top:81%;width:96%;aspect-ratio:3.6;--r:-3deg;--cp:none;--br:999px;--bg:linear-gradient(145deg,#5CC8FF,#2F6BFF);--c:#fff;--fs:8cqw"><i class="ol"></i><span class="sh"><span>a(b + c) = ab + ac</span></span></div></div><div class="pn"><span>03</span><span>Stiker &amp; Rumus</span></div></div><div class="face back sk"><div class="board"><div class="st" style="left:15%;top:18%;width:70%;aspect-ratio:1;--r:-6deg;--cp:polygon(25% 4%,75% 4%,100% 50%,75% 96%,25% 96%,0 50%);--br:0;--bg:linear-gradient(145deg,#5CF2C0,#12B886);--c:#04281E;--fs:26cqw"><i class="ol"></i><span class="sh"><span>84</span></span></div></div><small class="cap">12 × 7</small></div></div><div class="leaf"><div class="face front sk"><div class="kh"><span>STIKER 04</span><span>PANGKAT</span></div><div class="board"><div class="st" style="left:2%;top:1%;width:52%;aspect-ratio:1;--r:-10deg;--cp:polygon(50.0% 0.0%,65.7% 12.1%,85.4% 14.6%,87.9% 34.3%,100.0% 50.0%,87.9% 65.7%,85.4% 85.4%,65.7% 87.9%,50.0% 100.0%,34.3% 87.9%,14.6% 85.4%,12.1% 65.7%,0.0% 50.0%,12.1% 34.3%,14.6% 14.6%,34.3% 12.1%);--br:0;--bg:linear-gradient(145deg,#FF9A5C,#F0471F);--c:#fff;--fs:26cqw"><i class="ol"></i><span class="sh"><span>a²</span></span></div><div class="st" style="left:54%;top:5%;width:44%;aspect-ratio:1.1;--r:9deg;--cp:polygon(25% 4%,75% 4%,100% 50%,75% 96%,25% 96%,0 50%);--br:0;--bg:linear-gradient(145deg,#5CC8FF,#2F6BFF);--c:#fff;--fs:20cqw"><i class="ol"></i><span class="sh"><span>a³</span></span></div><div class="st" style="left:2%;top:39%;width:96%;aspect-ratio:2.5;--r:-3deg;--cp:none;--br:26%;--bg:linear-gradient(145deg,#9B7CFF,#5B3DF0);--c:#fff;--fs:7.5cqw"><i class="ol"></i><span class="sh"><span>(a + b)²<br>= a² + 2ab + b²</span></span></div><div class="st" style="left:2%;top:70%;width:46%;aspect-ratio:1.2;--r:6deg;--cp:none;--br:58% 42% 55% 45% / 48% 58% 42% 52%;--bg:linear-gradient(145deg,#5CF2C0,#12B886);--c:#04281E;--fs:5.8cqw"><i class="ol"></i><span class="sh"><span>(a−b)(a+b)<br>= a² − b²</span></span></div><div class="st" style="left:58%;top:71%;width:38%;aspect-ratio:1;--r:-8deg;--cp:none;--br:50%;--bg:linear-gradient(145deg,#FF7AC6,#E0309A);--c:#fff;--fs:8cqw"><i class="ol"></i><span class="sh"><span>5² = 25</span></span></div></div><div class="pn"><span>04</span><span>Stiker &amp; Rumus</span></div></div><div class="face back sk"><div class="board"><div class="st" style="left:15%;top:18%;width:70%;aspect-ratio:1;--r:-6deg;--cp:none;--br:26%;--bg:linear-gradient(145deg,#9B7CFF,#5B3DF0);--c:#fff;--fs:30cqw"><i class="ol"></i><span class="sh"><span>a²</span></span></div></div><small class="cap">kuadrat</small></div></div><div class="leaf"><div class="face front sk"><div class="kh"><span>STIKER 05</span><span>TRIK KILAT</span></div><div class="board"><div class="st" style="left:2%;top:2%;width:44%;aspect-ratio:1;--r:-8deg;--cp:none;--br:50%;--bg:linear-gradient(145deg,#FFD84D,#FF9F1C);--c:#2A1500;--fs:19cqw"><i class="ol"></i><span class="sh"><span>×9<small style="display:block;font-size:0.34em;font-weight:700;letter-spacing:0;margin-top:.15em">= ×10 − n</small></span></span></div><div class="st" style="left:52%;top:3%;width:46%;aspect-ratio:1;--r:10deg;--cp:polygon(50.0% 0.0%,65.7% 12.1%,85.4% 14.6%,87.9% 34.3%,100.0% 50.0%,87.9% 65.7%,85.4% 85.4%,65.7% 87.9%,50.0% 100.0%,34.3% 87.9%,14.6% 85.4%,12.1% 65.7%,0.0% 50.0%,12.1% 34.3%,14.6% 14.6%,34.3% 12.1%);--br:0;--bg:linear-gradient(145deg,#9B7CFF,#5B3DF0);--c:#fff;--fs:16cqw"><i class="ol"></i><span class="sh"><span>×11<small style="display:block;font-size:0.3em;font-weight:700;letter-spacing:0;margin-top:.15em">36 → 3|9|6 = 396</small></span></span></div><div class="st" style="left:2%;top:36%;width:56%;aspect-ratio:1.15;--r:-5deg;--cp:polygon(25% 4%,75% 4%,100% 50%,75% 96%,25% 96%,0 50%);--br:0;--bg:linear-gradient(145deg,#5CF2C0,#12B886);--c:#04281E;--fs:18cqw"><i class="ol"></i><span class="sh"><span>×5<small style="display:block;font-size:0.34em;font-weight:700;letter-spacing:0;margin-top:.15em">÷2 lalu ×10</small></span></span></div><div class="st" style="left:58%;top:38%;width:40%;aspect-ratio:1;--r:8deg;--cp:none;--br:26%;--bg:linear-gradient(145deg,#FF7AC6,#E0309A);--c:#fff;--fs:15cqw"><i class="ol"></i><span class="sh"><span>×25<small style="display:block;font-size:0.3em;font-weight:700;letter-spacing:0;margin-top:.15em">÷4 lalu ×100</small></span></span></div><div class="st" style="left:4%;top:74%;width:92%;aspect-ratio:3.2;--r:-2deg;--cp:none;--br:999px;--bg:linear-gradient(145deg,#5CC8FF,#2F6BFF);--c:#fff;--fs:8cqw"><i class="ol"></i><span class="sh"><span>×99 = ×100 − n</span></span></div></div><div class="pn"><span>05</span><span>Stiker &amp; Rumus</span></div></div><div class="face back sk"><div class="board"><div class="st" style="left:15%;top:18%;width:70%;aspect-ratio:1;--r:-6deg;--cp:polygon(50.0% 0.0%,65.7% 12.1%,85.4% 14.6%,87.9% 34.3%,100.0% 50.0%,87.9% 65.7%,85.4% 85.4%,65.7% 87.9%,50.0% 100.0%,34.3% 87.9%,14.6% 85.4%,12.1% 65.7%,0.0% 50.0%,12.1% 34.3%,14.6% 14.6%,34.3% 12.1%);--br:0;--bg:linear-gradient(145deg,#5CC8FF,#2F6BFF);--c:#fff;--fs:30cqw"><i class="ol"></i><span class="sh"><span>99</span></span></div></div><small class="cap">9 × 11</small></div></div><div class="leaf"><div class="face front sk"><div class="kh"><span>STIKER 06</span><span>BILANGAN RAKSASA</span></div><div class="board"><div class="st" style="left:2%;top:1%;width:52%;aspect-ratio:1;--r:-9deg;--cp:polygon(50.0% 0.0%,65.7% 12.1%,85.4% 14.6%,87.9% 34.3%,100.0% 50.0%,87.9% 65.7%,85.4% 85.4%,65.7% 87.9%,50.0% 100.0%,34.3% 87.9%,14.6% 85.4%,12.1% 65.7%,0.0% 50.0%,12.1% 34.3%,14.6% 14.6%,34.3% 12.1%);--br:0;--bg:linear-gradient(145deg,#5CC8FF,#2F6BFF);--c:#fff;--fs:24cqw"><i class="ol"></i><span class="sh"><span>n!</span></span></div><div class="st" style="left:54%;top:8%;width:44%;aspect-ratio:1;--r:10deg;--cp:none;--br:50%;--bg:linear-gradient(145deg,#FFD84D,#FF9F1C);--c:#2A1500;--fs:11cqw"><i class="ol"></i><span class="sh"><span>10²⁰</span></span></div><div class="st" style="left:2%;top:41%;width:60%;aspect-ratio:1.3;--r:-4deg;--cp:none;--br:26%;--bg:linear-gradient(145deg,#3A3470,#14102E);--c:#fff;--fs:8.5cqw"><i class="ol"></i><span class="sh"><span>2¹⁰ = 1024</span></span></div><div class="st" style="left:62%;top:43%;width:36%;aspect-ratio:1.1;--r:9deg;--cp:polygon(25% 4%,75% 4%,100% 50%,75% 96%,25% 96%,0 50%);--br:0;--bg:linear-gradient(145deg,#FF7AC6,#E0309A);--c:#fff;--fs:22cqw"><i class="ol"></i><span class="sh"><span>∞</span></span></div><div class="st" style="left:4%;top:78%;width:92%;aspect-ratio:3.4;--r:-2deg;--cp:none;--br:999px;--bg:linear-gradient(145deg,#5CF2C0,#12B886);--c:#04281E;--fs:7.4cqw"><i class="ol"></i><span class="sh"><span>50! ≈ 3,04 × 10⁶⁴</span></span></div></div><div class="pn"><span>06</span><span>Stiker &amp; Rumus</span></div></div><div class="face back sk"><div class="board"><div class="st" style="left:15%;top:18%;width:70%;aspect-ratio:1;--r:-6deg;--cp:none;--br:50%;--bg:linear-gradient(145deg,#FFD84D,#FF9F1C);--c:#2A1500;--fs:17cqw"><i class="ol"></i><span class="sh"><span>1024</span></span></div></div><small class="cap">2¹⁰</small></div></div><div class="leaf"><div class="face front sk"><div class="kh"><span>STIKER 07</span><span>HASIL TEPAT</span></div><div class="board"><div class="st" style="left:2%;top:1%;width:56%;aspect-ratio:1;--r:-8deg;--cp:polygon(50.0% 0.0%,65.7% 12.1%,85.4% 14.6%,87.9% 34.3%,100.0% 50.0%,87.9% 65.7%,85.4% 85.4%,65.7% 87.9%,50.0% 100.0%,34.3% 87.9%,14.6% 85.4%,12.1% 65.7%,0.0% 50.0%,12.1% 34.3%,14.6% 14.6%,34.3% 12.1%);--br:0;--bg:linear-gradient(145deg,#5CF2C0,#12B886);--c:#04281E;--fs:22cqw"><i class="ol"></i><span class="sh"><span>✓<small style="display:block;font-size:0.34em;font-weight:700;letter-spacing:0;margin-top:.15em">EKSAK</small></span></span></div><div class="st" style="left:56%;top:5%;width:42%;aspect-ratio:1.15;--r:9deg;--cp:none;--br:26%;--bg:linear-gradient(145deg,#9B7CFF,#5B3DF0);--c:#fff;--fs:8cqw"><i class="ol"></i><span class="sh"><span>0,1 × 3<br>= 0,3</span></span></div><div class="st" style="left:3%;top:46%;width:40%;aspect-ratio:1;--r:-9deg;--cp:none;--br:50%;--bg:linear-gradient(145deg,#FF7AC6,#E0309A);--c:#fff;--fs:7.5cqw"><i class="ol"></i><span class="sh"><span>1 ÷ 3<br>= 0,(3)</span></span></div><div class="st" style="left:46%;top:50%;width:52%;aspect-ratio:1.9;--r:5deg;--cp:none;--br:58% 42% 55% 45% / 48% 58% 42% 52%;--bg:linear-gradient(145deg,#FFD84D,#FF9F1C);--c:#2A1500;--fs:7.5cqw"><i class="ol"></i><span class="sh"><span>35 × 35<br>= 1225</span></span></div><div class="st" style="left:14%;top:76%;width:66%;aspect-ratio:2.8;--r:-3deg;--cp:polygon(25% 4%,75% 4%,100% 50%,75% 96%,25% 96%,0 50%);--br:0;--bg:linear-gradient(145deg,#D4F55A,#86D10C);--c:#142200;--fs:8cqw"><i class="ol"></i><span class="sh"><span>tanpa galat</span></span></div></div><button class="go" data-try="35×35" type="button" style="width:100%;margin-top:8px">Coba di kalkulator</button><div class="pn"><span>07</span><span>Stiker &amp; Rumus</span></div></div><div class="face back sk"><div class="board"><div class="st" style="left:15%;top:18%;width:70%;aspect-ratio:1;--r:-6deg;--cp:polygon(50.0% 0.0%,65.7% 12.1%,85.4% 14.6%,87.9% 34.3%,100.0% 50.0%,87.9% 65.7%,85.4% 85.4%,65.7% 87.9%,50.0% 100.0%,34.3% 87.9%,14.6% 85.4%,12.1% 65.7%,0.0% 50.0%,12.1% 34.3%,14.6% 14.6%,34.3% 12.1%);--br:0;--bg:linear-gradient(145deg,#5CF2C0,#12B886);--c:#04281E;--fs:40cqw"><i class="ol"></i><span class="sh"><span>∞</span></span></div></div><small class="cap">tanpa batas</small></div></div></div></div>
+<div class="fctl"><button class="fb" id="fprev" type="button" aria-label="Halaman sebelumnya"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button><b id="fcount" class="mono">1 / 7</b><button class="fb" id="fnext" type="button" aria-label="Halaman berikutnya"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button></div>
+</section>
+</main>
+
+<script>
+"use strict";
+const $=s=>document.querySelector(s);
+/* ===== Aritmatika pecahan eksak (BigInt) ===== */
+const gcd=(a,b)=>{a=a<0n?-a:a;b=b<0n?-b:b;while(b){[a,b]=[b,a%b]}return a};
+const Q=(n,d=1n)=>{if(d===0n)throw new Error("Pembagian dengan nol tidak terdefinisi");if(d<0n){n=-n;d=-d}const g=gcd(n,d)||1n;return{n:n/g,d:d/g}};
+const add=(a,b)=>Q(a.n*b.d+b.n*a.d,a.d*b.d),sub=(a,b)=>Q(a.n*b.d-b.n*a.d,a.d*b.d),mul=(a,b)=>Q(a.n*b.n,a.d*b.d),div=(a,b)=>Q(a.n*b.d,a.d*b.n);
+function pow(a,e){
+  if(e.d!==1n)throw new Error("Pangkat harus bilangan bulat");
+  let k=e.n;if(k>5000n||k<-5000n)throw new Error("Pangkat terlalu besar (maks 5000)");
+  const neg=k<0n;if(neg)k=-k;
+  if(a.n===0n&&neg)throw new Error("0 tidak bisa dipangkatkan negatif");
+  const r=Q(a.n**k,a.d**k);return neg?Q(r.d,r.n):r}
+function fact(a){
+  if(a.d!==1n||a.n<0n)throw new Error("Faktorial hanya untuk bilangan bulat ≥ 0");
+  if(a.n>3000n)throw new Error("Faktorial terlalu besar (maks 3000!)");
+  let r=1n;for(let i=2n;i<=a.n;i++)r*=i;return Q(r)}
+function parseNum(s){
+  const m=/^(\d*)\.?(\d*)$/.exec(s);if(!m||s==="."||s==="")throw new Error("Angka tidak valid");
+  const f=m[2]||"";return Q(BigInt((m[1]||"0")+f),10n**BigInt(f.length))}
+/* ===== Parser ekspresi ===== */
+function evaluate(src){
+  const t=[],s=src.trim(),re=/\s*(\d+\.?\d*|\.\d+|[+\-−×x*÷\/^()!%])/gy;let m,pos=0;
+  while(pos<s.length&&(m=re.exec(s))){t.push(m[1]);pos=re.lastIndex}
+  if(pos<s.length)throw new Error("Karakter tidak dikenali");
+  let i=0;const peek=()=>t[i],isNum=x=>x&&/^[\d.]/.test(x);
+  function expr(){let v=term();while(peek()==="+"||peek()==="-"||peek()==="−"){const o=t[i++],r=term();v=o==="+"?add(v,r):sub(v,r)}return v}
+  function term(){let v=unary();for(;;){const p=peek();
+    if(p==="×"||p==="x"||p==="*"){i++;v=mul(v,unary())}
+    else if(p==="÷"||p==="/"){i++;v=div(v,unary())}
+    else if(p==="("||isNum(p))v=mul(v,unary());
+    else break}return v}
+  function unary(){const p=peek();if(p==="-"||p==="−"){i++;return mul(Q(-1n),unary())}if(p==="+"){i++;return unary()}return power()}
+  function power(){let b=post();if(peek()==="^"){i++;b=pow(b,unary())}return b}
+  function post(){let v=prim();while(peek()==="!"||peek()==="%"){const o=t[i++];v=o==="!"?fact(v):div(v,Q(100n))}return v}
+  function prim(){const p=t[i++];
+    if(p===undefined)throw new Error("Hitungan belum lengkap");
+    if(isNum(p))return parseNum(p);
+    if(p==="("){const v=expr();if(t[i++]!==")")throw new Error("Kurung belum ditutup");return v}
+    throw new Error("Hitungan tidak valid dekat “"+p+"”")}
+  if(!t.length)throw new Error("Masukkan hitungan dulu");
+  const v=expr();if(i<t.length)throw new Error("Hitungan tidak valid dekat “"+t[i]+"”");return v}
+/* ===== Format hasil ===== */
+const group=s=>s.replace(/\B(?=(\d{3})+(?!\d))/g,".");
+function decimal(q,limit=60){
+  const neg=q.n<0n,n=neg?-q.n:q.n,ip=n/q.d;let r=n%q.d;const sg=neg?"-":"";
+  if(r===0n)return{text:sg+ip,exact:true};
+  const seen=new Map(),dig=[];
+  while(r!==0n&&dig.length<limit*4){
+    if(seen.has(r)){const k=seen.get(r);return{text:sg+ip+"."+dig.slice(0,k).join("")+"("+dig.slice(k).join("")+")",rep:true}}
+    seen.set(r,dig.length);r*=10n;dig.push(r/q.d);r%=q.d}
+  if(r===0n)return{text:sg+ip+"."+dig.join("")};
+  return{text:sg+ip+"."+dig.slice(0,limit).join("")+"…"}}
+function show(q){
+  const d=decimal(q);let meta;
+  if(q.d===1n){const a=String(q.n<0n?-q.n:q.n),len=a.length;meta=len>3?len+" digit · "+group(a).slice(0,110)+(len>34?"…":""):"Bilangan bulat"}
+  else meta="Pecahan eksak: "+q.n+"/"+q.d+(d.rep?" · angka di ( ) berulang":"");
+  return{main:q.d===1n?String(q.n):d.text,meta}}
+const ans=q=>q.d===1n?String(q.n):"("+q.n+"÷"+q.d+")";
+/* ===== Layar hitung: hasil hanya muncul saat = ditekan ===== */
+let ex="",done=null;
+const HK="riwayat-x";let hist=[];
+try{hist=JSON.parse(localStorage.getItem(HK)||"[]").filter(x=>x&&x.e&&x.n&&x.d)}catch(_){hist=[]}
+const saveH=()=>{try{localStorage.setItem(HK,JSON.stringify(hist))}catch(_){}};
+const hq=x=>({n:BigInt(x.n),d:BigInt(x.d)});
+const TRASH='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M9 7V4.5h6V7M6.5 7l1 13h9l1-13M10 11v5M14 11v5"/></svg>';
+const exEl=$("#expr"),rsEl=$("#res"),mtEl=$("#meta");
+function setRes(txt,cls){rsEl.textContent=txt;rsEl.className=(txt.length>14?"long ":"")+(cls||"")}
+function render(){
+  if(done){exEl.textContent=done.e+" =";setRes(done.r.main);mtEl.textContent=done.r.meta}
+  else{exEl.textContent="";setRes(ex||"0");mtEl.textContent=ex?"Tekan = untuk melihat hasil":""}}
+function press(k){
+  if(k==="C"){ex="";done=null;render();return}
+  if(k==="B"){if(done){ex=ans(done.q);done=null}ex=ex.slice(0,-1);render();return}
+  if(k==="="){if(!ex||done)return;
+    try{const q=evaluate(ex),r=show(q);done={e:ex,r,q};
+      addHist(done);render()}
+    catch(e){setRes(e.message,"err");mtEl.textContent="";exEl.textContent=ex}
+    return}
+  if(done){ex=/^[\d.(]$/.test(k)?"":ans(done.q);done=null}  /* operator melanjutkan hasil, angka memulai baru */
+  ex+=k;render()}
+function addHist(dn){
+  const m=dn.r.main;hist.unshift({e:dn.e,m:m.length>300?m.slice(0,300)+"…":m,n:String(dn.q.n),d:String(dn.q.d),t:Date.now()});
+  if(hist.length>100)hist.pop();saveH();renderHist()}
+function renderHist(){
+  const L=$("#hlist");L.innerHTML="";
+  $("#hcount").textContent=hist.length+" hitungan";$("#hclear").hidden=!hist.length;
+  if(!hist.length){L.innerHTML='<div class="hempty"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Belum ada riwayat.<br>Ketik hitungan lalu tekan =, hasilnya tersimpan di sini.</div>';return}
+  hist.forEach(x=>{
+    const row=document.createElement("div");row.className="hitem";
+    const b=document.createElement("button");b.type="button";b.className="hmain";
+    const e=document.createElement("span");e.className="he";e.textContent=x.e+" =";
+    const r=document.createElement("span");r.className="hr";r.textContent=x.m;
+    b.append(e,r);b.onclick=()=>{ex=ans(hq(x));done=null;render();showTab("calc")};
+    const d=document.createElement("button");d.type="button";d.className="hdel";d.setAttribute("aria-label","Hapus dari riwayat");d.innerHTML=TRASH;
+    d.onclick=()=>{row.classList.add("out");setTimeout(()=>{const i=hist.indexOf(x);if(i>-1)hist.splice(i,1);saveH();renderHist()},180)};
+    row.append(b,d);L.appendChild(row)})}
+(function(){const btn=$("#hclear"),lab=btn.querySelector("span");let t;
+  const rst=()=>{btn.classList.remove("sure");lab.textContent="Hapus semua"};
+  btn.onclick=()=>{if(!btn.classList.contains("sure")){btn.classList.add("sure");lab.textContent="Yakin? Ketuk lagi";t=setTimeout(rst,3000);return}
+    clearTimeout(t);hist=[];saveH();renderHist();rst()}})();
+$("#calc").addEventListener("click",e=>{const b=e.target.closest("[data-i],[data-k]");if(!b)return;
+  try{navigator.vibrate&&navigator.vibrate(8)}catch(_){}
+  press(b.dataset.k||b.dataset.i)});
+document.addEventListener("keydown",e=>{
+  if($("#calc").hidden||e.target.tagName==="INPUT"||e.ctrlKey||e.metaKey)return;
+  const k=e.key;
+  if(/^[\d.()+^!%]$/.test(k))press(k);
+  else if(k==="*"||k==="x"||k==="X")press("×");
+  else if(k==="/")press("÷");else if(k==="-")press("−");
+  else if(k==="Enter"||k==="="){e.preventDefault();press("=")}
+  else if(k==="Backspace")press("B");else if(k==="Escape")press("C")});
+/* ===== Tabel × ===== */
+function buildTable(){
+  const L=$("#tl");L.innerHTML="";
+  try{const base=evaluate($("#tn").value);let m=parseInt($("#tm").value,10);
+    if(!(m>=1))throw new Error("Isi “sampai kali ke” dengan angka ≥ 1");if(m>200)m=200;
+    const bs=show(base).main;
+    for(let k=1;k<=m;k++){const d=document.createElement("div");d.innerHTML="<span></span><span></span>";
+      d.children[0].textContent=bs+" × "+k;d.children[1].textContent=show(mul(base,Q(BigInt(k)))).main;L.appendChild(d)}}
+  catch(e){L.innerHTML="<div><span style='color:var(--err)'></span></div>";L.querySelector("span").textContent=e.message}}
+$("#tgo").onclick=buildTable;$("#tn").onkeydown=$("#tm").onkeydown=e=>{if(e.key==="Enter")buildTable()};
+/* ===== Faktor prima ===== */
+function factorize(){
+  const out=$("#pr"),raw=$("#pn").value.replace(/[.\s,]/g,"");
+  if(!/^\d+$/.test(raw)||Number(raw)<2){out.textContent="Masukkan bilangan bulat ≥ 2";return}
+  let n=Number(raw);if(n>Number.MAX_SAFE_INTEGER){out.textContent="Terlalu besar";return}
+  const orig=n,f=[],take=p=>{let c=0;while(n%p===0){n/=p;c++}if(c)f.push([p,c])};
+  take(2);take(3);for(let p=5;p*p<=n;p+=6){take(p);take(p+2)}
+  if(n>1)f.push([n,1]);
+  out.innerHTML=group(String(orig))+" = <em>"+f.map(([p,c])=>c>1?p+"<sup>"+c+"</sup>":""+p).join(" × ")+"</em>"+(f.length===1&&f[0][1]===1?"<br><small>Bilangan prima</small>":"")}
+$("#pgo").onclick=factorize;$("#pn").onkeydown=e=>{if(e.key==="Enter")factorize()};
+/* ===== Tab & tema ===== */
+function showTab(t){
+  document.querySelectorAll("nav button").forEach(x=>x.setAttribute("aria-selected",x.dataset.t===t));
+  ["calc","table","prime","history"].forEach(id=>$("#"+id).hidden=id!==t);
+  if(t==="table"&&!$("#tl").children.length)buildTable();
+  if(t==="prime"&&!$("#pr").textContent)factorize();
+  if(t==="history")renderHist()}
+document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>showTab(b.dataset.t));
+$("#theme").onclick=()=>{const r=document.documentElement,n=r.dataset.theme==="dark"?"light":"dark";
+  r.classList.add("tt");setTimeout(()=>r.classList.remove("tt"),450);
+  r.dataset.theme=n;try{localStorage.setItem("theme",n)}catch(_){}
+  document.querySelector('meta[name=theme-color]').content=n==="dark"?"#07060F":"#F5F3FF"};
+/* ===== Menu samping & tampilan ===== */
+let curTab="calc";
+const _st=showTab;showTab=function(t){curTab=t;_st(t)};
+function menu(o){document.body.classList.toggle("menu",o);$("#menuBtn").setAttribute("aria-expanded",o);$("#drawer").setAttribute("aria-hidden",!o);
+  if(o)setTimeout(()=>$("#dclose").focus(),80);else $("#menuBtn").focus()}
+function showView(v){
+  document.querySelectorAll(".di").forEach(x=>x.setAttribute("aria-current",x.dataset.v===v));
+  $("#flip").hidden=v!=="flip";$("nav").hidden=v!=="calc";
+  $("header small").textContent=v==="calc"?"HASIL EKSAK":"FLIPBOOK 3D";
+  if(v==="calc")showTab(curTab);else["calc","table","prime","history"].forEach(id=>$("#"+id).hidden=true);
+  scrollTo(0,0)}
+$("#menuBtn").onclick=()=>menu(true);$("#dclose").onclick=()=>menu(false);$("#scrim").onclick=()=>menu(false);
+document.querySelectorAll(".di").forEach(b=>b.onclick=()=>{showView(b.dataset.v);menu(false)});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&document.body.classList.contains("menu"))menu(false)});
+/* ===== Flipbook 3D ===== */
+(function(){
+  const book=$("#book"),lv=[...book.querySelectorAll(".leaf")],N=lv.length;let p=0,tm;
+  const z=()=>lv.forEach((l,i)=>l.style.zIndex=i<p?i+1:N-i);
+  function mark(){lv.forEach((l,i)=>l.classList.toggle("f",i<p));
+    $("#fcount").textContent=p>=N?"Selesai":(p+1)+" / "+N;$("#fprev").disabled=p===0;$("#fnext").disabled=p>=N}
+  function go(d){const np=p+d;if(np<0||np>N)return;lv[d>0?p:np].style.zIndex=N+5;p=np;mark();clearTimeout(tm);tm=setTimeout(z,750)}
+  $("#fprev").onclick=()=>go(-1);$("#fnext").onclick=()=>go(1);
+  book.addEventListener("click",e=>{
+    const t=e.target.closest("[data-try]");
+    if(t){ex=t.dataset.try;done=null;render();showView("calc");showTab("calc");return}
+    if(e.target.closest("button,a"))return;
+    const r=book.getBoundingClientRect();go(e.clientX-r.left>r.width*.4?1:-1)});
+  let sx=null;book.addEventListener("touchstart",e=>{sx=e.touches[0].clientX},{passive:true});
+  book.addEventListener("touchend",e=>{if(sx===null)return;const dx=e.changedTouches[0].clientX-sx;sx=null;
+    if(Math.abs(dx)>45){go(dx<0?1:-1);e.preventDefault()}});
+  document.addEventListener("keydown",e=>{if($("#flip").hidden||e.target.tagName==="INPUT")return;
+    if(e.key==="ArrowRight")go(1);else if(e.key==="ArrowLeft")go(-1)});
+  z();mark();
+})();
+render();renderHist();
+</script>
+<script>
+(function(){
+  const cv=document.getElementById("bg"),cx=cv.getContext("2d"),still=matchMedia("(prefers-reduced-motion:reduce)").matches;
+  let W,H,P=[],rgb=[139,108,255],raf;
+  const link=140;
+  function color(){const v=getComputedStyle(document.documentElement).getPropertyValue("--acc").trim();
+    const m=/^#([\da-f]{2})([\da-f]{2})([\da-f]{2})$/i.exec(v);if(m)rgb=[parseInt(m[1],16),parseInt(m[2],16),parseInt(m[3],16)]}
+  function size(){const d=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;cv.width=W*d;cv.height=H*d;cx.setTransform(d,0,0,d,0,0);
+    const n=Math.round(Math.min(80,Math.max(28,W*H/15000)));
+    P=Array.from({length:n},()=>({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.45,vy:(Math.random()-.5)*.45,r:Math.random()*1.4+.9}));}
+  function frame(){
+    cx.clearRect(0,0,W,H);const c=rgb.join(",");
+    for(const p of P){p.x+=p.vx;p.y+=p.vy;
+      if(p.x<-10)p.x=W+10;else if(p.x>W+10)p.x=-10;
+      if(p.y<-10)p.y=H+10;else if(p.y>H+10)p.y=-10}
+    for(let i=0;i<P.length;i++){const a=P[i];
+      for(let j=i+1;j<P.length;j++){const b=P[j],dx=a.x-b.x,dy=a.y-b.y,d=dx*dx+dy*dy;
+        if(d<link*link){cx.strokeStyle="rgba("+c+","+(.22*(1-Math.sqrt(d)/link)).toFixed(3)+")";cx.lineWidth=1;cx.beginPath();cx.moveTo(a.x,a.y);cx.lineTo(b.x,b.y);cx.stroke()}}
+      cx.fillStyle="rgba("+c+",.65)";cx.beginPath();cx.arc(a.x,a.y,a.r,0,6.283);cx.fill()}
+    if(!still)raf=requestAnimationFrame(frame)}
+  function start(){cancelAnimationFrame(raf);color();frame()}
+  size();start();
+  addEventListener("resize",()=>{size();if(still)frame()});
+  document.addEventListener("visibilitychange",()=>{if(document.hidden)cancelAnimationFrame(raf);else if(!still)start()});
+  new MutationObserver(()=>{color();if(still)frame()}).observe(document.documentElement,{attributes:true,attributeFilter:["data-theme"]});
+})();
+</script>
+</body>
+</html>
