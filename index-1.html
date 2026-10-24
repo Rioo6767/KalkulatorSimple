@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Kalkulator × Tepat</title>
+<meta name="description" content="Kalkulator perkalian dengan hasil eksak: bilangan raksasa, pecahan, dan desimal berulang tanpa pembulatan.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✖️</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#E8ECF6;--panel:#F6F8FD;--ink:#14213D;--mut:#5B6785;--key:#fff;--op:#14213D;--opt:#fff;--acc:#2B50FF;--acct:#fff;--line:#CBD3E6;--err:#B3261E}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0E1426;--panel:#161E38;--ink:#E8ECF9;--mut:#8F9BC0;--key:#212B4D;--op:#E8ECF9;--opt:#0E1426;--acc:#5B7BFF;--acct:#fff;--line:#2A365F;--err:#FF8A80}}
+:root[data-theme="dark"]{--bg:#0E1426;--panel:#161E38;--ink:#E8ECF9;--mut:#8F9BC0;--key:#212B4D;--op:#E8ECF9;--opt:#0E1426;--acc:#5B7BFF;--acct:#fff;--line:#2A365F;--err:#FF8A80}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:"Bricolage Grotesque",system-ui,sans-serif;min-height:100vh;padding:env(safe-area-inset-top,0) 12px env(safe-area-inset-bottom,0);display:flex;justify-content:center}
+main{width:100%;max-width:440px;padding:14px 0 24px}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+h1{font-size:22px;margin:0;font-weight:700;letter-spacing:-.02em}
+h1 b{color:var(--acc);font-size:28px;margin-right:4px}
+#theme{background:none;border:1px solid var(--line);color:var(--ink);border-radius:999px;padding:6px 12px;font:inherit;font-size:13px}
+nav{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;background:var(--panel);padding:4px;border-radius:14px;margin-bottom:12px}
+nav button{border:0;background:none;color:var(--mut);font:inherit;font-weight:500;padding:9px 4px;border-radius:10px;font-size:14px}
+nav button[aria-selected=true]{background:var(--ink);color:var(--bg)}
+button:focus-visible,input:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+section[hidden]{display:none}
+.screen{background:var(--panel);border-radius:18px;padding:14px 16px;margin-bottom:10px;min-height:128px;display:flex;flex-direction:column;justify-content:flex-end;text-align:right;font-family:"IBM Plex Mono",ui-monospace,monospace}
+#expr{color:var(--mut);font-size:17px;word-break:break-all;min-height:24px}
+#res{font-size:30px;font-weight:500;word-break:break-all;line-height:1.2;margin-top:4px}
+#res.long{font-size:18px}
+#res.err{color:var(--err);font-size:16px;font-family:"Bricolage Grotesque",sans-serif}
+#meta{color:var(--mut);font-size:12.5px;margin-top:6px;word-break:break-all;line-height:1.4}
+.shortcuts{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-bottom:8px}
+.shortcuts button{background:none;border:1.5px solid var(--acc);color:var(--acc);border-radius:10px;padding:8px 0;font:inherit;font-weight:700;font-size:14px}
+.pad{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.pad button{border:0;border-radius:16px;height:58px;font:inherit;font-size:22px;font-weight:500;background:var(--key);color:var(--ink);box-shadow:0 1px 0 var(--line)}
+.pad button:active{transform:translateY(1px);filter:brightness(.94)}
+.pad .o{background:var(--op);color:var(--opt)}
+.pad .f{background:var(--panel);color:var(--ink);font-size:18px}
+.pad .x{background:var(--acc);color:var(--acct);font-size:30px;font-weight:700}
+.pad .eq{background:var(--acc);color:var(--acct);grid-column:span 2}
+.row{display:flex;gap:8px;margin-bottom:10px}
+input{flex:1;min-width:0;font:inherit;font-family:"IBM Plex Mono",monospace;font-size:18px;padding:12px 14px;border-radius:14px;border:1.5px solid var(--line);background:var(--panel);color:var(--ink)}
+.go{border:0;background:var(--acc);color:var(--acct);border-radius:14px;padding:0 18px;font:inherit;font-weight:700;font-size:16px}
+label{font-size:13px;color:var(--mut);display:block;margin:0 0 4px 2px}
+.list{background:var(--panel);border-radius:18px;padding:6px 14px;font-family:"IBM Plex Mono",monospace;font-size:15px}
+.list div{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--line)}
+.list div:last-child{border:0}
+.list span:last-child{font-weight:500;word-break:break-all;text-align:right}
+.note{color:var(--mut);font-size:13px;margin:8px 2px;line-height:1.45}
+.big{background:var(--panel);border-radius:18px;padding:16px;font-family:"IBM Plex Mono",monospace;font-size:22px;word-break:break-word;line-height:1.5}
+.big em{font-style:normal;color:var(--acc);font-weight:700}
+.hist{margin-top:12px}
+.hist button{display:block;width:100%;text-align:right;background:none;border:0;border-bottom:1px solid var(--line);color:var(--mut);font-family:"IBM Plex Mono",monospace;font-size:13px;padding:8px 2px;word-break:break-all}
+@media (prefers-reduced-motion:no-preference){.pad button{transition:transform .06s}}
+</style>
+</head>
+<body>
+<main>
+<header><h1><b>×</b>Kalkulator Tepat</h1><button id="theme" type="button">Tema</button></header>
+<nav role="tablist">
+<button role="tab" aria-selected="true" data-t="calc">Hitung</button>
+<button role="tab" aria-selected="false" data-t="table">Tabel ×</button>
+<button role="tab" aria-selected="false" data-t="prime">Faktor ×</button>
+</nav>
+
+<section id="calc">
+<div class="screen"><div id="expr"></div><div id="res">0</div><div id="meta"></div></div>
+<div class="shortcuts" aria-label="Pintasan perkalian">
+<button data-i="^2">x²</button><button data-i="^3">x³</button><button data-i="×10">×10</button><button data-i="×100">×100</button><button data-i="×1000">×1k</button><button data-i="×0.5">×½</button>
+</div>
+<div class="pad">
+<button class="f" data-k="C">AC</button><button class="f" data-k="B" aria-label="Hapus">⌫</button><button class="f" data-i="(">(</button><button class="f" data-i=")">)</button>
+<button class="f" data-i="^">^</button><button class="f" data-i="!">n!</button><button class="f" data-i="%">%</button><button class="o" data-i="÷">÷</button>
+<button data-i="7">7</button><button data-i="8">8</button><button data-i="9">9</button><button class="x" data-i="×" aria-label="Kali">×</button>
+<button data-i="4">4</button><button data-i="5">5</button><button data-i="6">6</button><button class="o" data-i="−">−</button>
+<button data-i="1">1</button><button data-i="2">2</button><button data-i="3">3</button><button class="o" data-i="+">+</button>
+<button data-i="0">0</button><button data-i=".">.</button><button class="eq" data-k="=">=</button>
+</div>
+<div class="hist" id="hist"></div>
+</section>
+
+<section id="table" hidden>
+<label for="tn">Bilangan (boleh desimal atau ekspresi)</label>
+<div class="row"><input id="tn" value="7" inputmode="decimal" autocomplete="off"><input id="tm" value="12" inputmode="numeric" style="max-width:84px" aria-label="Sampai kali ke"></div>
+<button class="go" id="tgo" style="width:100%;height:46px;margin-bottom:10px" type="button">Buat tabel ×</button>
+<div class="list" id="tl"></div>
+<p class="note">Setiap baris dihitung eksak, bukan dari bilangan desimal komputer, jadi tidak ada galat pembulatan.</p>
+</section>
+
+<section id="prime" hidden>
+<label for="pn">Bilangan bulat positif</label>
+<div class="row"><input id="pn" value="360360" inputmode="numeric" autocomplete="off"><button class="go" id="pgo" type="button">Uraikan</button></div>
+<div class="big" id="pr"></div>
+<p class="note">Mengurai bilangan menjadi hasil kali bilangan prima. Batas aman: sampai 9.007.199.254.740.991.</p>
+</section>
+</main>
+
+<script>
+"use strict";
+const $=s=>document.querySelector(s);
+/* ===== Aritmatika pecahan eksak (BigInt) ===== */
+const gcd=(a,b)=>{a=a<0n?-a:a;b=b<0n?-b:b;while(b){[a,b]=[b,a%b]}return a};
+const Q=(n,d=1n)=>{if(d===0n)throw new Error("Pembagian dengan nol tidak terdefinisi");if(d<0n){n=-n;d=-d}const g=gcd(n,d)||1n;return{n:n/g,d:d/g}};
+const add=(a,b)=>Q(a.n*b.d+b.n*a.d,a.d*b.d);
+const sub=(a,b)=>Q(a.n*b.d-b.n*a.d,a.d*b.d);
+const mul=(a,b)=>Q(a.n*b.n,a.d*b.d);
+const div=(a,b)=>Q(a.n*b.d,a.d*b.n);
+function pow(a,e){
+  if(e.d!==1n)throw new Error("Pangkat harus bilangan bulat");
+  let k=e.n;if(k>5000n||k<-5000n)throw new Error("Pangkat terlalu besar (maks 5000)");
+  const neg=k<0n;if(neg)k=-k;
+  if(a.n===0n&&neg)throw new Error("0 tidak bisa dipangkatkan negatif");
+  let r=Q(a.n**k,a.d**k);return neg?Q(r.d,r.n):r}
+function fact(a){
+  if(a.d!==1n||a.n<0n)throw new Error("Faktorial hanya untuk bilangan bulat ≥ 0");
+  if(a.n>3000n)throw new Error("Faktorial terlalu besar (maks 3000!)");
+  let r=1n;for(let i=2n;i<=a.n;i++)r*=i;return Q(r)}
+function parseNum(s){
+  const m=/^(\d*)\.?(\d*)$/.exec(s);if(!m||s==="."||s==="")throw new Error("Angka tidak valid: "+s);
+  const f=m[2]||"";return Q(BigInt((m[1]||"0")+f),10n**BigInt(f.length))}
+/* ===== Parser ekspresi ===== */
+function evaluate(src){
+  const t=[];const re=/\s*(\d+\.?\d*|\.\d+|[+\-−×x*÷\/^()!%])/gy;let m,pos=0;
+  const s=src.trim();re.lastIndex=0;
+  while(pos<s.length&&(m=re.exec(s))){t.push(m[1]);pos=re.lastIndex}
+  if(pos<s.length)throw new Error("Karakter tidak dikenali");
+  let i=0;const peek=()=>t[i],isNum=x=>x&&/^[\d.]/.test(x);
+  function expr(){let v=term();while(peek()==="+"||peek()==="-"||peek()==="−"){const o=t[i++];const r=term();v=o==="+"?add(v,r):sub(v,r)}return v}
+  function term(){let v=unary();
+    for(;;){const p=peek();
+      if(p==="×"||p==="x"||p==="*"){i++;v=mul(v,unary())}
+      else if(p==="÷"||p==="/"){i++;v=div(v,unary())}
+      else if(p==="("||isNum(p)){v=mul(v,unary())} /* perkalian tersirat: 2(3) */
+      else break}
+    return v}
+  function unary(){const p=peek();if(p==="-"||p==="−"){i++;return mul(Q(-1n),unary())}if(p==="+"){i++;return unary()}return power()}
+  function power(){let b=post();if(peek()==="^"){i++;const e=unary();b=pow(b,e)}return b}
+  function post(){let v=prim();while(peek()==="!"||peek()==="%"){const o=t[i++];v=o==="!"?fact(v):div(v,Q(100n))}return v}
+  function prim(){const p=t[i++];
+    if(p===undefined)throw new Error("Ekspresi belum lengkap");
+    if(isNum(p))return parseNum(p);
+    if(p==="("){const v=expr();if(t[i++]!==")")throw new Error("Kurung belum ditutup");return v}
+    throw new Error("Ekspresi tidak valid dekat “"+p+"”")}
+  if(!t.length)throw new Error("Masukkan ekspresi");
+  const v=expr();if(i<t.length)throw new Error("Ekspresi tidak valid dekat “"+t[i]+"”");return v}
+/* ===== Format hasil ===== */
+const group=s=>s.replace(/\B(?=(\d{3})+(?!\d))/g,".");
+function decimal(q,limit=60){
+  const neg=q.n<0n;let n=neg?-q.n:q.n;const ip=n/q.d;let r=n%q.d;
+  if(r===0n)return{text:(neg?"-":"")+ip,exact:true};
+  const seen=new Map(),dig=[];
+  while(r!==0n&&dig.length<limit*4){
+    if(seen.has(r)){const k=seen.get(r);
+      return{text:(neg?"-":"")+ip+"."+dig.slice(0,k).join("")+"("+dig.slice(k).join("")+")",exact:true,rep:true}}
+    seen.set(r,dig.length);r*=10n;dig.push(r/q.d);r%=q.d}
+  if(r===0n)return{text:(neg?"-":"")+ip+"."+dig.join(""),exact:true};
+  return{text:(neg?"-":"")+ip+"."+dig.slice(0,limit).join("")+"…",exact:false}}
+function show(q){
+  const d=decimal(q),isInt=q.d===1n;
+  const main=isInt?String(q.n):d.text;
+  let meta="";
+  if(isInt){const len=(q.n<0n?-q.n:q.n).toString().length;meta=len>3?len+" digit · "+group(String(q.n<0n?-q.n:q.n)).slice(0,120)+(len>40?"…":""):"Bilangan bulat"}
+  else{meta="Pecahan eksak: "+q.n+"/"+q.d+(d.rep?" · tanda ( ) = angka berulang":"")}
+  return{main,meta}}
+/* ===== Layar hitung ===== */
+let ex="",justEq=false;const hist=[];
+const exEl=$("#expr"),rsEl=$("#res"),mtEl=$("#meta");
+function setRes(txt,cls){rsEl.textContent=txt;rsEl.className=(txt.length>16?"long ":"")+(cls||"")}
+function live(){exEl.textContent=ex;
+  if(!ex){setRes("0");mtEl.textContent="";return}
+  try{const q=evaluate(ex);const r=show(q);setRes(r.main);mtEl.textContent=r.meta}catch(e){/* tunggu input lengkap */}}
+function press(k){
+  if(k==="C"){ex="";justEq=false;live();return}
+  if(k==="B"){ex=ex.slice(0,-1);live();return}
+  if(k==="="){if(!ex)return;
+    try{const q=evaluate(ex);const r=show(q);setRes(r.main);mtEl.textContent=r.meta;
+      hist.unshift({e:ex,r:r.main,q});if(hist.length>8)hist.pop();renderHist();
+      exEl.textContent=ex+" =";ex=q.d===1n?String(q.n).replace("-","−"):ex;if(q.d!==1n)ex=r.main.includes("(")||r.main.includes("…")?"("+q.n+"÷"+q.d+")":r.main;justEq=true}
+    catch(e){setRes(e.message,"err");mtEl.textContent=""}return}
+  if(justEq&&/^[\d.(]/.test(k)){ex=""}
+  justEq=false;ex+=k;live()}
+function renderHist(){const h=$("#hist");h.innerHTML="";
+  hist.forEach(x=>{const b=document.createElement("button");b.textContent=x.e+" = "+(x.r.length>50?x.r.slice(0,50)+"…":x.r);
+    b.onclick=()=>{ex=String(x.q.d===1n?x.q.n:"("+x.q.n+"÷"+x.q.d+")").replace("-","−");justEq=false;live()};h.appendChild(b)})}
+document.addEventListener("click",e=>{const b=e.target.closest("[data-i],[data-k]");if(!b||!$("#calc").contains(b))return;press(b.dataset.k||b.dataset.i)});
+document.addEventListener("keydown",e=>{
+  if($("#calc").hidden||e.target.tagName==="INPUT"||e.ctrlKey||e.metaKey)return;
+  const k=e.key;
+  if(/^[\d.()+^!%]$/.test(k))press(k);
+  else if(k==="*"||k==="x"||k==="X")press("×");
+  else if(k==="/")press("÷");
+  else if(k==="-")press("−");
+  else if(k==="Enter"||k==="="){e.preventDefault();press("=")}
+  else if(k==="Backspace")press("B");
+  else if(k==="Escape")press("C")});
+/* ===== Tabel × ===== */
+function buildTable(){
+  const L=$("#tl");L.innerHTML="";
+  try{const base=evaluate($("#tn").value);let m=parseInt($("#tm").value,10);
+    if(!(m>=1))throw new Error("Isi “sampai kali ke” dengan angka ≥ 1");if(m>200)m=200;
+    const bs=show(base).main;
+    for(let k=1;k<=m;k++){const r=show(mul(base,Q(BigInt(k)))).main;
+      const d=document.createElement("div");d.innerHTML="<span></span><span></span>";
+      d.children[0].textContent=bs+" × "+k;d.children[1].textContent=r;L.appendChild(d)}}
+  catch(e){L.innerHTML="<div><span style='color:var(--err)'>"+e.message+"</span></div>"}}
+$("#tgo").onclick=buildTable;$("#tn").onkeydown=$("#tm").onkeydown=e=>{if(e.key==="Enter")buildTable()};
+/* ===== Faktor prima ===== */
+function factorize(){
+  const out=$("#pr"),raw=$("#pn").value.replace(/[.\s,]/g,"");
+  if(!/^\d+$/.test(raw)||Number(raw)<2){out.textContent="Masukkan bilangan bulat ≥ 2";return}
+  let n=Number(raw);if(n>Number.MAX_SAFE_INTEGER){out.textContent="Terlalu besar (maks 9.007.199.254.740.991)";return}
+  const orig=n,f=[];
+  const take=p=>{let c=0;while(n%p===0){n/=p;c++}if(c)f.push([p,c])};
+  take(2);take(3);
+  for(let p=5;p*p<=n;p+=6){take(p);take(p+2)}
+  if(n>1)f.push([n,1]);
+  const parts=f.map(([p,c])=>c>1?p+"<sup>"+c+"</sup>":""+p);
+  out.innerHTML=group(String(orig))+" = <em>"+parts.join(" × ")+"</em>"+(f.length===1&&f[0][1]===1?"<br><small>Bilangan prima</small>":"")}
+$("#pgo").onclick=factorize;$("#pn").onkeydown=e=>{if(e.key==="Enter")factorize()};
+/* ===== Tab & tema ===== */
+document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{
+  document.querySelectorAll("nav button").forEach(x=>x.setAttribute("aria-selected",x===b));
+  ["calc","table","prime"].forEach(id=>$("#"+id).hidden=id!==b.dataset.t);
+  if(b.dataset.t==="table"&&!$("#tl").children.length)buildTable();
+  if(b.dataset.t==="prime"&&!$("#pr").textContent)factorize()});
+$("#theme").onclick=()=>{const r=document.documentElement;
+  const dark=r.dataset.theme?r.dataset.theme==="dark":matchMedia("(prefers-color-scheme:dark)").matches;
+  r.dataset.theme=dark?"light":"dark"};
+live();
+</script>
+</body>
+</html>
